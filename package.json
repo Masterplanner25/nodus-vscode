@@ -14,7 +14,6 @@
   },
   "categories": ["Programming Languages", "Snippets"],
   "keywords": ["nodus", "nd", "workflow", "scripting", "ai"],
-  "icon": "images/icon.png",
   "activationEvents": ["onLanguage:nodus"],
   "main": "./out/extension.js",
   "contributes": {
@@ -74,10 +73,24 @@
     "keybindings": [
       {
         "command": "nodus.runFile",
-        "key": "ctrl+f5",
+        "key": "ctrl+alt+n",
         "when": "resourceExtname == .nd && editorFocus"
       }
     ],
+    "configurationDefaults": {
+      "editor.tokenColorCustomizations": {
+        "textMateRules": [
+          {
+            "scope": "constant.numeric.integer.nd",
+            "settings": { "foreground": "#4FC1FF" }
+          },
+          {
+            "scope": "constant.numeric.float.nd",
+            "settings": { "foreground": "#B5CEA8" }
+          }
+        ]
+      }
+    },
     "configuration": {
       "title": "Nodus",
       "properties": {

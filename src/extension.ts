@@ -11,7 +11,7 @@ export function activate(context: vscode.ExtensionContext) {
         100
     );
     statusBarItem.text = '$(play) Nodus';
-    statusBarItem.tooltip = 'Run Nodus file (Ctrl+F5)';
+    statusBarItem.tooltip = 'Run Nodus file (Ctrl+Alt+N)';
     statusBarItem.command = 'nodus.runFile';
 
     const runDisposable = vscode.commands.registerCommand('nodus.runFile', runFile);

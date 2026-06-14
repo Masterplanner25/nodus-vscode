@@ -5,7 +5,7 @@ VS Code extension for [Nodus](https://github.com/Masterplanner25/Nodus) — a wo
 ## Features
 
 - **Syntax highlighting** for `.nd` files — keywords, DSL blocks, string interpolation, integer suffix (`42i`), both `//` and `#` comments
-- **Run File** — press `Ctrl+F5` or click `▶ Nodus` in the status bar
+- **Run File** — press `Ctrl+Alt+N` or click `▶ Nodus` in the status bar
 - **Format File** — runs `nodus fmt` via right-click or the Command Palette
 - **Code snippets** — `fn`, `workflow`, `goal`, `step`, `tryc`, `spawn`, and more
 
@@ -23,7 +23,7 @@ Verify: `nodus --version` should print `4.x.x`.
 
 | Command | Keybinding | Description |
 |---------|-----------|-------------|
-| Nodus: Run File | `Ctrl+F5` | Run the current `.nd` file in a terminal |
+| Nodus: Run File | `Ctrl+Alt+N` | Run the current `.nd` file in a terminal |
 | Nodus: Format File | — | Format with `nodus fmt` |
 
 Both commands are also available via right-click on a `.nd` file and the Command Palette (`Ctrl+Shift+P`).
