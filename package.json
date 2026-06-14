@@ -47,6 +47,11 @@
       {
         "command": "nodus.formatFile",
         "title": "Nodus: Format File"
+      },
+      {
+        "command": "nodus.debugFile",
+        "title": "Nodus: Debug File",
+        "icon": "$(debug-alt)"
       }
     ],
     "menus": {
@@ -54,19 +59,29 @@
         {
           "command": "nodus.runFile",
           "when": "resourceExtname == .nd",
-          "group": "navigation"
+          "group": "navigation@1"
+        },
+        {
+          "command": "nodus.debugFile",
+          "when": "resourceExtname == .nd",
+          "group": "navigation@2"
         }
       ],
       "editor/context": [
         {
           "command": "nodus.runFile",
           "when": "resourceExtname == .nd",
-          "group": "nodus"
+          "group": "nodus@1"
+        },
+        {
+          "command": "nodus.debugFile",
+          "when": "resourceExtname == .nd",
+          "group": "nodus@2"
         },
         {
           "command": "nodus.formatFile",
           "when": "resourceExtname == .nd",
-          "group": "nodus"
+          "group": "nodus@3"
         }
       ]
     },
@@ -75,6 +90,57 @@
         "command": "nodus.runFile",
         "key": "ctrl+alt+n",
         "when": "resourceExtname == .nd && editorFocus"
+      },
+      {
+        "command": "nodus.debugFile",
+        "key": "ctrl+alt+d",
+        "when": "resourceExtname == .nd && editorFocus"
+      }
+    ],
+    "breakpoints": [
+      { "language": "nodus" }
+    ],
+    "debuggers": [
+      {
+        "type": "nodus",
+        "label": "Nodus Debug",
+        "languages": ["nodus"],
+        "initialConfigurations": [
+          {
+            "type": "nodus",
+            "request": "launch",
+            "name": "Debug Nodus File",
+            "program": "${file}"
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "Nodus: Debug File",
+            "description": "Debug the current .nd file",
+            "body": {
+              "type": "nodus",
+              "request": "launch",
+              "name": "Debug Nodus File",
+              "program": "${file}"
+            }
+          }
+        ],
+        "configurationAttributes": {
+          "launch": {
+            "required": ["program"],
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "Absolute path to the .nd file to debug.",
+                "default": "${file}"
+              },
+              "projectRoot": {
+                "type": "string",
+                "description": "Project root directory for resolving imports."
+              }
+            }
+          }
+        }
       }
     ],
     "configurationDefaults": {

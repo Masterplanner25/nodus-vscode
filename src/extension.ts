@@ -19,11 +19,13 @@ export function activate(context: vscode.ExtensionContext) {
 
     const runDisposable = vscode.commands.registerCommand('nodus.runFile', runFile);
     const formatDisposable = vscode.commands.registerCommand('nodus.formatFile', formatFile);
+    const debugDisposable = vscode.commands.registerCommand('nodus.debugFile', debugFile);
 
     context.subscriptions.push(
         diagnosticCollection,
         runDisposable,
         formatDisposable,
+        debugDisposable,
         statusBarItem,
         vscode.window.onDidChangeActiveTextEditor(updateStatusBar),
         vscode.window.onDidCloseTerminal(t => {
@@ -37,6 +39,43 @@ export function activate(context: vscode.ExtensionContext) {
             diagnosticCollection.delete(doc.uri);
         })
     );
+
+    // DAP: resolve config so F5 works without a launch.json
+    const configProvider = vscode.debug.registerDebugConfigurationProvider('nodus', {
+        resolveDebugConfiguration(
+            _folder: vscode.WorkspaceFolder | undefined,
+            config: vscode.DebugConfiguration
+        ): vscode.DebugConfiguration {
+            if (!config.type && !config.request && !config.name) {
+                const editor = vscode.window.activeTextEditor;
+                if (editor && editor.document.languageId === 'nodus') {
+                    config.type = 'nodus';
+                    config.name = 'Debug Nodus File';
+                    config.request = 'launch';
+                    config.program = editor.document.uri.fsPath;
+                }
+            }
+            if (!config.program) {
+                const editor = vscode.window.activeTextEditor;
+                if (editor && editor.document.languageId === 'nodus') {
+                    config.program = editor.document.uri.fsPath;
+                }
+            }
+            return config;
+        }
+    });
+
+    // DAP: launch `nodus dap` as the debug adapter process
+    const adapterFactory = vscode.debug.registerDebugAdapterDescriptorFactory('nodus', {
+        createDebugAdapterDescriptor(
+            _session: vscode.DebugSession
+        ): vscode.DebugAdapterDescriptor {
+            const nodusPath = nodusExecutable();
+            return new vscode.DebugAdapterExecutable(nodusPath, ['dap']);
+        }
+    });
+
+    context.subscriptions.push(configProvider, adapterFactory);
 
     // Lint any already-open .nd files on activation
     vscode.workspace.textDocuments.forEach(doc => lintDocument(doc));
@@ -112,6 +151,30 @@ async function formatFile() {
         } else {
             vscode.commands.executeCommand('workbench.action.revertFile');
         }
+    });
+}
+
+// --- Debug ---
+
+async function debugFile() {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+        vscode.window.showErrorMessage('Nodus: no active editor');
+        return;
+    }
+    if (editor.document.languageId !== 'nodus') {
+        vscode.window.showErrorMessage('Nodus: active file is not a .nd file');
+        return;
+    }
+
+    await editor.document.save();
+
+    const filePath = editor.document.uri.fsPath;
+    await vscode.debug.startDebugging(undefined, {
+        type: 'nodus',
+        request: 'launch',
+        name: 'Debug Nodus File',
+        program: filePath
     });
 }
 
