@@ -4,8 +4,11 @@ import * as path from 'path';
 
 let runTerminal: vscode.Terminal | undefined;
 let statusBarItem: vscode.StatusBarItem;
+let diagnosticCollection: vscode.DiagnosticCollection;
 
 export function activate(context: vscode.ExtensionContext) {
+    diagnosticCollection = vscode.languages.createDiagnosticCollection('nodus');
+
     statusBarItem = vscode.window.createStatusBarItem(
         vscode.StatusBarAlignment.Right,
         100
@@ -18,6 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
     const formatDisposable = vscode.commands.registerCommand('nodus.formatFile', formatFile);
 
     context.subscriptions.push(
+        diagnosticCollection,
         runDisposable,
         formatDisposable,
         statusBarItem,
@@ -26,11 +30,21 @@ export function activate(context: vscode.ExtensionContext) {
             if (t === runTerminal) {
                 runTerminal = undefined;
             }
+        }),
+        vscode.workspace.onDidSaveTextDocument(doc => lintDocument(doc)),
+        vscode.workspace.onDidOpenTextDocument(doc => lintDocument(doc)),
+        vscode.workspace.onDidCloseTextDocument(doc => {
+            diagnosticCollection.delete(doc.uri);
         })
     );
 
+    // Lint any already-open .nd files on activation
+    vscode.workspace.textDocuments.forEach(doc => lintDocument(doc));
+
     updateStatusBar();
 }
+
+// --- Run ---
 
 async function runFile() {
     const editor = vscode.window.activeTextEditor;
@@ -67,6 +81,8 @@ async function runFile() {
     runTerminal.sendText(cmd);
 }
 
+// --- Format ---
+
 async function formatFile() {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -94,11 +110,106 @@ async function formatFile() {
                 `Nodus fmt failed: ${stderr.trim() || error.message}`
             );
         } else {
-            // Reload editor to reflect in-place changes from nodus fmt
             vscode.commands.executeCommand('workbench.action.revertFile');
         }
     });
 }
+
+// --- Diagnostics ---
+
+function nodusExecutable(): string {
+    return vscode.workspace.getConfiguration('nodus').get<string>('executablePath', 'nodus');
+}
+
+function lintDocument(document: vscode.TextDocument) {
+    if (document.languageId !== 'nodus' || document.uri.scheme !== 'file') {
+        return;
+    }
+
+    const filePath = document.uri.fsPath;
+    const nodusPath = nodusExecutable();
+
+    const cmd = process.platform === 'win32'
+        ? `"${nodusPath}" check "${filePath}"`
+        : `'${nodusPath}' check '${filePath}'`;
+
+    cp.exec(cmd, (_error, _stdout, stderr) => {
+        if (!stderr.trim()) {
+            diagnosticCollection.delete(document.uri);
+            return;
+        }
+        const diagnostics = parseNodusErrors(stderr, filePath, document);
+        diagnosticCollection.set(document.uri, diagnostics);
+    });
+}
+
+function parseNodusErrors(
+    stderr: string,
+    filePath: string,
+    document: vscode.TextDocument
+): vscode.Diagnostic[] {
+    const diagnostics: vscode.Diagnostic[] = [];
+
+    for (const line of stderr.split('\n')) {
+        const trimmed = line.trim();
+        if (!trimmed) {
+            continue;
+        }
+
+        // "Prefix at /path/to/file.nd:LINE:COL: message"
+        // Escape path for regex — handles Windows drive colons and spaces
+        const escapedPath = filePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const withPath = new RegExp(
+            `at ${escapedPath}:(\\d+):(\\d+): (.+)$`
+        );
+        let m = trimmed.match(withPath);
+        if (m) {
+            diagnostics.push(makeDiagnostic(
+                parseInt(m[1], 10) - 1,
+                parseInt(m[2], 10) - 1,
+                m[3],
+                document
+            ));
+            continue;
+        }
+
+        // "Prefix at line N, col M: message" (no path in output)
+        m = trimmed.match(/at line (\d+), col (\d+): (.+)$/);
+        if (m) {
+            diagnostics.push(makeDiagnostic(
+                parseInt(m[1], 10) - 1,
+                parseInt(m[2], 10) - 1,
+                m[3],
+                document
+            ));
+            continue;
+        }
+
+        // "Prefix: message" with no location — pin to first line
+        m = trimmed.match(/^(?:Syntax error|Runtime error|Sandbox error|Error|[A-Za-z]+ error): (.+)$/);
+        if (m) {
+            diagnostics.push(makeDiagnostic(0, 0, m[1], document));
+        }
+    }
+
+    return diagnostics;
+}
+
+function makeDiagnostic(
+    line: number,
+    col: number,
+    message: string,
+    document: vscode.TextDocument
+): vscode.Diagnostic {
+    const safeLine = Math.max(0, Math.min(line, document.lineCount - 1));
+    const lineText = document.lineAt(safeLine);
+    const safeCol = Math.max(0, Math.min(col, lineText.text.length));
+    // Highlight from the error column to end of line
+    const range = new vscode.Range(safeLine, safeCol, safeLine, lineText.text.length);
+    return new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Error);
+}
+
+// --- Status bar ---
 
 function updateStatusBar() {
     const editor = vscode.window.activeTextEditor;
