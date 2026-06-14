@@ -1,0 +1,197 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Nodus",
+  "scopeName": "source.nd",
+  "fileTypes": ["nd"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#dsl-blocks" },
+    { "include": "#function-definition" },
+    { "include": "#keywords" },
+    { "include": "#constants" },
+    { "include": "#storage-types" },
+    { "include": "#builtins" },
+    { "include": "#numbers" },
+    { "include": "#operators" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.nd",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.line.number-sign.nd",
+          "match": "#.*$"
+        }
+      ]
+    },
+
+    "strings": {
+      "name": "string.quoted.double.nd",
+      "begin": "\"",
+      "end": "\"",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.string.begin.nd" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.string.end.nd" }
+      },
+      "patterns": [
+        {
+          "name": "meta.interpolation.nd",
+          "begin": "\\\\\\(",
+          "end": "\\)",
+          "beginCaptures": {
+            "0": { "name": "punctuation.section.interpolation.begin.nd" }
+          },
+          "endCaptures": {
+            "0": { "name": "punctuation.section.interpolation.end.nd" }
+          },
+          "patterns": [{ "include": "$self" }]
+        },
+        {
+          "name": "constant.character.escape.nd",
+          "match": "\\\\."
+        }
+      ]
+    },
+
+    "dsl-blocks": {
+      "patterns": [
+        {
+          "comment": "workflow name / goal name",
+          "match": "\\b(workflow|goal)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\b",
+          "captures": {
+            "1": { "name": "keyword.other.dsl.nd" },
+            "2": { "name": "entity.name.type.workflow.nd" }
+          }
+        },
+        {
+          "comment": "step name",
+          "match": "\\b(step)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\b",
+          "captures": {
+            "1": { "name": "keyword.other.dsl.nd" },
+            "2": { "name": "entity.name.function.step.nd" }
+          }
+        }
+      ]
+    },
+
+    "function-definition": {
+      "patterns": [
+        {
+          "comment": "export fn name(",
+          "match": "\\b(export)\\s+(fn)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()",
+          "captures": {
+            "1": { "name": "keyword.other.nd" },
+            "2": { "name": "keyword.other.nd" },
+            "3": { "name": "entity.name.function.nd" }
+          }
+        },
+        {
+          "comment": "fn name(",
+          "match": "\\b(fn)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()",
+          "captures": {
+            "1": { "name": "keyword.other.nd" },
+            "2": { "name": "entity.name.function.nd" }
+          }
+        }
+      ]
+    },
+
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.nd",
+          "match": "\\b(if|else|while|for|in|return|throw|try|catch|finally|yield)\\b"
+        },
+        {
+          "name": "keyword.other.nd",
+          "match": "\\b(let|fn|import|export|from|as|record)\\b"
+        },
+        {
+          "name": "keyword.other.dsl.nd",
+          "match": "\\b(workflow|goal|step|after|with|state|action|checkpoint|retries|retry_delay_ms|timeout_ms)\\b"
+        }
+      ]
+    },
+
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean.nd",
+          "match": "\\b(true|false)\\b"
+        },
+        {
+          "name": "constant.language.null.nd",
+          "match": "\\bnil\\b"
+        }
+      ]
+    },
+
+    "storage-types": {
+      "patterns": [
+        {
+          "comment": "type annotation after : or ->",
+          "match": "(?::|->)\\s*(int|float|string|bool)\\b",
+          "captures": {
+            "1": { "name": "storage.type.nd" }
+          }
+        }
+      ]
+    },
+
+    "builtins": {
+      "patterns": [
+        {
+          "comment": "core built-in functions (only when followed by open-paren)",
+          "name": "support.function.builtin.nd",
+          "match": "\\b(print|str|type|len|range|has_key|keys|values|list_push|list_pop|list_slice|channel|send|recv|close|coroutine|spawn|resume|run_loop|coroutine_status|run_workflow|run_goal|math_abs|math_min|math_max|math_floor|math_ceil|math_sqrt|math_pow|math_idiv|math_is_int|math_is_float|str_upper|str_lower|str_trim|str_split|str_contains|str_replace|str_startswith|str_endswith|agent_call|agent_available|agent_describe|effect_resolve|effect_pending|effect_complete|effect_action_id|effect_store_size|effect_get_result|math_round|math_log|math_log2|math_log10|math_sin|math_cos|math_tan|math_atan2|math_pi|math_e|math_inf|math_nan|math_imod)\\b(?=\\s*\\()"
+        }
+      ]
+    },
+
+    "numbers": {
+      "patterns": [
+        {
+          "comment": "integer literal with i suffix — must come before float",
+          "name": "constant.numeric.integer.nd",
+          "match": "-?\\b\\d+i\\b"
+        },
+        {
+          "comment": "float literal",
+          "name": "constant.numeric.float.nd",
+          "match": "-?\\b\\d+(\\.\\d+)?([eE][+-]?\\d+)?\\b"
+        }
+      ]
+    },
+
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.comparison.nd",
+          "match": "==|!=|<=|>=|<|>"
+        },
+        {
+          "name": "keyword.operator.logical.nd",
+          "match": "&&|\\|\\||!"
+        },
+        {
+          "name": "keyword.operator.arithmetic.nd",
+          "match": "\\+|-|\\*|/|%"
+        },
+        {
+          "name": "keyword.operator.arrow.nd",
+          "match": "->"
+        },
+        {
+          "name": "keyword.operator.assignment.nd",
+          "match": "(?<![=!<>])=(?!=)"
+        }
+      ]
+    }
+  }
+}

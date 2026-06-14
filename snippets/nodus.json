@@ -1,0 +1,232 @@
+{
+  "Function definition": {
+    "prefix": "fn",
+    "body": [
+      "fn ${1:name}(${2:params}) {",
+      "\t${0}",
+      "}"
+    ],
+    "description": "Define a function"
+  },
+
+  "Function with return type": {
+    "prefix": "fnr",
+    "body": [
+      "fn ${1:name}(${2:params}) -> ${3:int} {",
+      "\t${0}",
+      "}"
+    ],
+    "description": "Define a function with return type annotation"
+  },
+
+  "Let declaration": {
+    "prefix": "let",
+    "body": ["let ${1:name} = ${0}"],
+    "description": "Declare a variable"
+  },
+
+  "Workflow block": {
+    "prefix": "workflow",
+    "body": [
+      "workflow ${1:name} {",
+      "\tstep ${2:first} {",
+      "\t\t${0}",
+      "\t}",
+      "}"
+    ],
+    "description": "Workflow DSL block"
+  },
+
+  "Goal block": {
+    "prefix": "goal",
+    "body": [
+      "goal ${1:name} {",
+      "\tstep ${2:first} {",
+      "\t\t${0}",
+      "\t}",
+      "}"
+    ],
+    "description": "Goal DSL block"
+  },
+
+  "Step": {
+    "prefix": "step",
+    "body": [
+      "step ${1:name} {",
+      "\t${0}",
+      "}"
+    ],
+    "description": "Workflow/goal step"
+  },
+
+  "Step with dependency": {
+    "prefix": "stepafter",
+    "body": [
+      "step ${1:name} after ${2:dep} {",
+      "\t${0}",
+      "}"
+    ],
+    "description": "Step that runs after another step"
+  },
+
+  "Step with options": {
+    "prefix": "stepwith",
+    "body": [
+      "step ${1:name} with { retries: ${2:3}, retry_delay_ms: ${3:500}, timeout_ms: ${4:5000} } {",
+      "\t${0}",
+      "}"
+    ],
+    "description": "Step with retry and timeout options"
+  },
+
+  "Import module": {
+    "prefix": "import",
+    "body": ["import \"std:${1:strings}\" as ${2:strings}"],
+    "description": "Import a stdlib module"
+  },
+
+  "Import named": {
+    "prefix": "importfrom",
+    "body": ["import { ${1:name} } from \"${2:path}\""],
+    "description": "Named import from a file"
+  },
+
+  "Try/catch": {
+    "prefix": "tryc",
+    "body": [
+      "try {",
+      "\t${1}",
+      "} catch ${2:err} {",
+      "\tprint(${2}.message)",
+      "\t${0}",
+      "}"
+    ],
+    "description": "Try/catch block"
+  },
+
+  "Try/catch/finally": {
+    "prefix": "trycf",
+    "body": [
+      "try {",
+      "\t${1}",
+      "} catch ${2:err} {",
+      "\tprint(${2}.message)",
+      "} finally {",
+      "\t${0}",
+      "}"
+    ],
+    "description": "Try/catch/finally block"
+  },
+
+  "If statement": {
+    "prefix": "if",
+    "body": [
+      "if (${1:condition}) {",
+      "\t${0}",
+      "}"
+    ],
+    "description": "If statement"
+  },
+
+  "If/else": {
+    "prefix": "ife",
+    "body": [
+      "if (${1:condition}) {",
+      "\t${2}",
+      "} else {",
+      "\t${0}",
+      "}"
+    ],
+    "description": "If/else block"
+  },
+
+  "While loop": {
+    "prefix": "while",
+    "body": [
+      "while (${1:condition}) {",
+      "\t${0}",
+      "}"
+    ],
+    "description": "While loop"
+  },
+
+  "While counter loop": {
+    "prefix": "whilei",
+    "body": [
+      "let ${1:i} = 0i",
+      "while (${1} < ${2:n}) {",
+      "\t${0}",
+      "\t${1} = ${1} + 1i",
+      "}"
+    ],
+    "description": "While loop with integer counter"
+  },
+
+  "For-in loop": {
+    "prefix": "fori",
+    "body": [
+      "for ${1:item} in ${2:list} {",
+      "\t${0}",
+      "}"
+    ],
+    "description": "For-in loop"
+  },
+
+  "Print": {
+    "prefix": "print",
+    "body": ["print(${0})"],
+    "description": "Print a value"
+  },
+
+  "Coroutine spawn": {
+    "prefix": "spawn",
+    "body": [
+      "spawn(coroutine(fn() {",
+      "\t${0}",
+      "}))"
+    ],
+    "description": "Spawn a coroutine onto the event loop"
+  },
+
+  "Channel pattern": {
+    "prefix": "channel",
+    "body": [
+      "let ${1:ch} = channel()",
+      "spawn(coroutine(fn() {",
+      "\tsend(${1}, ${2:value})",
+      "\tclose(${1})",
+      "}))",
+      "let ${3:result} = recv(${1})"
+    ],
+    "description": "Channel producer/consumer pattern"
+  },
+
+  "Record": {
+    "prefix": "record",
+    "body": ["record {${1:field}: ${0}}"],
+    "description": "Record literal"
+  },
+
+  "Run workflow": {
+    "prefix": "runwf",
+    "body": [
+      "let ${1:result} = run_workflow(${2:my_pipeline})",
+      "print(${1}[\"${0}\"])"
+    ],
+    "description": "Run a workflow and access result"
+  },
+
+  "Check helper": {
+    "prefix": "check",
+    "body": [
+      "fn check(label, got, want) {",
+      "\tif (got == want) {",
+      "\t\tprint(\"  ok: \" + label)",
+      "\t} else {",
+      "\t\tprint(\"  FAIL: \" + label + \" got=\" + str(got) + \" want=\" + str(want))",
+      "\t}",
+      "}"
+    ],
+    "description": "Test check helper function"
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "name": "nodus-lang",
+  "displayName": "Nodus Language",
+  "description": "Syntax highlighting, snippets, and run/format support for .nd files",
+  "version": "0.1.0",
+  "publisher": "masterplanner25",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Masterplanner25/nodus-vscode"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Programming Languages", "Snippets"],
+  "keywords": ["nodus", "nd", "workflow", "scripting", "ai"],
+  "icon": "images/icon.png",
+  "activationEvents": ["onLanguage:nodus"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "nodus",
+        "aliases": ["Nodus", "nodus"],
+        "extensions": [".nd"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "nodus",
+        "scopeName": "source.nd",
+        "path": "./syntaxes/nodus.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "nodus",
+        "path": "./snippets/nodus.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "nodus.runFile",
+        "title": "Nodus: Run File",
+        "icon": "$(play)"
+      },
+      {
+        "command": "nodus.formatFile",
+        "title": "Nodus: Format File"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "nodus.runFile",
+          "when": "resourceExtname == .nd",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "nodus.runFile",
+          "when": "resourceExtname == .nd",
+          "group": "nodus"
+        },
+        {
+          "command": "nodus.formatFile",
+          "when": "resourceExtname == .nd",
+          "group": "nodus"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "nodus.runFile",
+        "key": "ctrl+f5",
+        "when": "resourceExtname == .nd && editorFocus"
+      }
+    ],
+    "configuration": {
+      "title": "Nodus",
+      "properties": {
+        "nodus.executablePath": {
+          "type": "string",
+          "default": "nodus",
+          "description": "Path to the nodus executable. Defaults to 'nodus' (must be on PATH). Use an absolute path if nodus is not on PATH."
+        },
+        "nodus.reuseTerminal": {
+          "type": "boolean",
+          "default": false,
+          "description": "Reuse an existing 'Nodus Run' terminal instead of creating a new one each time."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^2.22.0"
+  }
+}
