@@ -5,9 +5,14 @@ VS Code extension for [Nodus](https://github.com/Masterplanner25/Nodus) — a wo
 ## Features
 
 - **Syntax highlighting** for `.nd` files — keywords, DSL blocks, string interpolation, integer suffix (`42i`), both `//` and `#` comments
+- **Code snippets** — `fn`, `workflow`, `goal`, `step`, `tryc`, `spawn`, and more (23 total)
+- **Diagnostics** — syntax and import errors shown as squiggly lines as you type
 - **Run File** — press `Ctrl+Alt+N` or click `▶ Nodus` in the status bar
 - **Format File** — runs `nodus fmt` via right-click or the Command Palette
-- **Code snippets** — `fn`, `workflow`, `goal`, `step`, `tryc`, `spawn`, and more
+- **Debug** — press `Ctrl+Alt+D` or `F5` to launch the DAP debugger (`nodus dap`); supports breakpoints and step-through
+- **Hover docs** — hover over any variable or function to see its type or signature
+- **Go to Definition** — press `F12` to jump to where a symbol is defined
+- **Completions** — `Ctrl+Space` shows functions, variables, keywords, and stdlib module names
 
 ## Requirements
 
@@ -25,8 +30,9 @@ Verify: `nodus --version` should print `4.x.x`.
 |---------|-----------|-------------|
 | Nodus: Run File | `Ctrl+Alt+N` | Run the current `.nd` file in a terminal |
 | Nodus: Format File | — | Format with `nodus fmt` |
+| Nodus: Debug File | `Ctrl+Alt+D` | Launch the DAP debugger |
 
-Both commands are also available via right-click on a `.nd` file and the Command Palette (`Ctrl+Shift+P`).
+All commands are also available via right-click on a `.nd` file and the Command Palette (`Ctrl+Shift+P`).
 
 ## Configuration
 
@@ -34,12 +40,21 @@ Both commands are also available via right-click on a `.nd` file and the Command
 |---------|---------|-------------|
 | `nodus.executablePath` | `nodus` | Path to the nodus executable. Use an absolute path if nodus is not on PATH. |
 | `nodus.reuseTerminal` | `false` | Reuse the existing Nodus terminal instead of opening a new one each run. |
+| `nodus.lspCommand` | `[]` | Override the language server command. Use to point at a specific Python or dev source. |
 
 ### Custom executable path example
 
 ```json
 {
-  "nodus.executablePath": "C:/dev/Coding Language/.venv/Scripts/nodus.exe"
+  "nodus.executablePath": "C:/path/to/nodus.exe"
+}
+```
+
+### Development: point LSP at dev source
+
+```json
+{
+  "nodus.lspCommand": ["python", "C:/dev/Coding Language/nodus.py", "lsp"]
 }
 ```
 
