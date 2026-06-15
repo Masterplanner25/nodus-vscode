@@ -1,10 +1,19 @@
 import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import * as path from 'path';
+import {
+    LanguageClient,
+    LanguageClientOptions,
+    RevealOutputChannelOn,
+    ServerOptions,
+    Trace
+} from 'vscode-languageclient/node';
 
 let runTerminal: vscode.Terminal | undefined;
 let statusBarItem: vscode.StatusBarItem;
 let diagnosticCollection: vscode.DiagnosticCollection;
+let lspClient: LanguageClient | undefined;
+let lspRunning = false;
 
 export function activate(context: vscode.ExtensionContext) {
     diagnosticCollection = vscode.languages.createDiagnosticCollection('nodus');
@@ -77,10 +86,73 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(configProvider, adapterFactory);
 
-    // Lint any already-open .nd files on activation
+    // LSP: start `nodus lsp` and wire it as a LanguageClient
+    startLanguageServer(context);
+
+    // Lint any already-open .nd files on activation (skipped once LSP is running)
     vscode.workspace.textDocuments.forEach(doc => lintDocument(doc));
 
     updateStatusBar();
+}
+
+function startLanguageServer(context: vscode.ExtensionContext) {
+    const config = vscode.workspace.getConfiguration('nodus');
+    const lspCommand = config.get<string[]>('lspCommand', []);
+
+    let serverOptions: ServerOptions;
+    if (lspCommand.length > 0) {
+        // User-supplied override — use as-is (supports dev source path)
+        serverOptions = { command: lspCommand[0], args: lspCommand.slice(1) };
+    } else {
+        // Default: spawn installed nodus executable
+        // On Windows, .bat files can't be spawned directly; wrap in cmd /c
+        const nodus = nodusExecutable();
+        serverOptions = process.platform === 'win32'
+            ? { command: 'cmd', args: ['/c', nodus, 'lsp'] }
+            : { command: nodus, args: ['lsp'] };
+    }
+
+    const outputChannel = vscode.window.createOutputChannel('Nodus Language Server');
+
+    const clientOptions: LanguageClientOptions = {
+        documentSelector: [
+            { scheme: 'file', language: 'nodus' },
+            { scheme: 'file', pattern: '**/*.nd' }
+        ],
+        outputChannel,
+        traceOutputChannel: outputChannel,
+        revealOutputChannelOn: RevealOutputChannelOn.Error,
+    };
+
+    lspClient = new LanguageClient(
+        'nodus-lsp',
+        'Nodus Language Server',
+        serverOptions,
+        clientOptions
+    );
+
+    lspClient.start().then(async () => {
+        lspRunning = true;
+        // Show errors in output channel only; use "nodus-lsp.trace.server": "verbose" to debug
+        await lspClient!.setTrace(Trace.Off);
+        // LSP publishes its own diagnostics — clear Phase 2 set to avoid duplicates
+        diagnosticCollection.clear();
+        const openNodus = vscode.workspace.textDocuments
+            .filter(d => d.languageId === 'nodus' || d.uri.fsPath.endsWith('.nd'));
+        outputChannel.appendLine(
+            `[nodus-lsp] Language server started. Open .nd files: ${openNodus.length}`
+        );
+        openNodus.forEach(d =>
+            outputChannel.appendLine(`  ${d.uri.toString()} (lang=${d.languageId})`)
+        );
+    }).catch((err: Error) => {
+        // LSP failed to start — Phase 2 (nodus check) continues as fallback
+        lspRunning = false;
+        outputChannel.appendLine(`[nodus-lsp] Failed to start: ${err.message}`);
+        outputChannel.show();
+    });
+
+    context.subscriptions.push(lspClient, outputChannel);
 }
 
 // --- Run ---
@@ -185,6 +257,9 @@ function nodusExecutable(): string {
 }
 
 function lintDocument(document: vscode.TextDocument) {
+    if (lspRunning) {
+        return; // LSP publishes diagnostics via textDocument/publishDiagnostics
+    }
     if (document.languageId !== 'nodus' || document.uri.scheme !== 'file') {
         return;
     }
@@ -283,6 +358,9 @@ function updateStatusBar() {
     }
 }
 
-export function deactivate() {
+export async function deactivate() {
     runTerminal = undefined;
+    if (lspClient) {
+        await lspClient.stop();
+    }
 }
