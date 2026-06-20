@@ -1,5 +1,7 @@
 # Nodus Language Support
 
+> **Status:** v0.1.0 — published on the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=MasterplanInfiniteWeave.nodus-vscode).
+
 VS Code extension for [Nodus](https://github.com/Masterplanner25/Nodus) — a workflow and scripting language for AI-native applications.
 
 ## Features
