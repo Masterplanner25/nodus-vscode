@@ -114,7 +114,7 @@
         },
         {
           "name": "keyword.other.dsl.nd",
-          "match": "\\b(workflow|goal|step|after|with|state|action|checkpoint|retries|retry_delay_ms|timeout_ms)\\b"
+          "match": "\\b(workflow|goal|step|after|with|state|action|checkpoint|retries|retry_delay_ms|timeout_ms|over|until|budget|reached|retry|max_iterations|deadline_ms)\\b"
         }
       ]
     },
