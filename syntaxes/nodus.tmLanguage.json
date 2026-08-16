@@ -106,7 +106,7 @@
       "patterns": [
         {
           "name": "keyword.control.nd",
-          "match": "\\b(if|else|while|for|in|return|throw|try|catch|finally|yield)\\b"
+          "match": "\\b(if|else|while|for|in|return|throw|try|catch|finally|yield|match|break|continue)\\b"
         },
         {
           "name": "keyword.other.nd",
