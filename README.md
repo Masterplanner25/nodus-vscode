@@ -24,7 +24,7 @@ Install Nodus:
 pip install nodus-lang
 ```
 
-Verify: `nodus --version` should print `4.x.x`.
+Verify: `nodus --version` should print `5.x.x`.
 
 ## Commands
 
