@@ -2,7 +2,7 @@
   "name": "nodus-lang",
   "displayName": "Nodus Language",
   "description": "Syntax highlighting, snippets, and run/format support for .nd files",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "MasterplanInfiniteWeave",
   "license": "MIT",
   "repository": {

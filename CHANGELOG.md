@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.3] — 2026-08-19
+
+- Highlight `when`, the step guard keyword added in nodus-lang
+  ([nodus-lang#471](https://github.com/Masterplanner25/Nodus/issues/471)).
+  A step can now carry a condition, using the same restricted predicate grammar
+  as a goal's `until`:
+
+  ```nd
+  step ship     after review when reached("approved")  { ... }
+  step escalate after review when !reached("approved") { ... }
+  ```
+
+  `when` is contextual, so it remains usable as an identifier.
+
 ## [0.1.2] — 2026-08-17
 
 - Highlight the five `goal` keywords added in nodus-lang v5.0.0: `over`,
