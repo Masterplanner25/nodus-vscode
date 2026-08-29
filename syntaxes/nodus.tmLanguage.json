@@ -110,7 +110,7 @@
         },
         {
           "name": "keyword.other.nd",
-          "match": "\\b(let|fn|import|export|from|as|record)\\b"
+          "match": "\\b(let|fn|extern|import|export|from|as|record)\\b"
         },
         {
           "name": "keyword.other.dsl.nd",
