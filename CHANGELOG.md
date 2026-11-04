@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.6] — 2026-11-04
+
+- Security: update the bundled `brace-expansion` from 2.1.1 to 2.1.7, which fixes
+  six denial-of-service advisories. It ships inside the extension through
+  `vscode-languageclient` and `minimatch`. Exposure was low, because the patterns
+  it receives come from this extension and from the language server.
+- Packaging: move `@vscode/vsce` from 2.x to 4.x, which clears its vulnerable
+  `markdown-it` and `linkify-it`, and update the other dev dependencies. **Building
+  the extension now needs Node 22 or later.** No change to editor behaviour.
+
 ## [0.1.3] — 2026-08-19
 
 - Highlight `when`, the step guard keyword added in nodus-lang
